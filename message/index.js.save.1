@@ -584,27 +584,28 @@ module.exports = msgHandler = async (bocchi = new Client(), message) => {
                             await bocchi.reply(from, 'Error!', id)
                         })
                 break
-                case prefix+'ytmp4':
-                    if (!isRegistered) return await bocchi.reply(from, ind.notRegistered(), id)
-                    if (!isUrl(url) && !url.includes('youtu.be')) return await bocchi.reply(from, ind.wrongFormat(), id)
-                    if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await bocchi.reply(from, ind.limit(), id)
-                    limit.addLimit(sender.id, _limit, isPremium, isOwner)
-                    await bocchi.reply(from, ind.wait(), id)
-                    downloader.ytdl(url)
-                        .then(async ({result}) => {
-                            if (Number(result.size.split(' MB')[0]) >= 50) {
-                                await bocchi.reply(from, ind.videoLimit(), id)
-                            } else {
-                                await bocchi.sendFileFromUrl(from, result.imgUrl, `${result.title}.jpg`, ind.ytFound(result), id)
-                                await bocchi.sendFileFromUrl(from, result.UrlVideo, `${result.title}.mp3`, '', id)
-                                console.log('Success sending YouTube video!')
-                            }
-                        })
-                        .catch(async (err) => {
-                            console.error(err)
-                            await bocchi.reply(from, 'Error!', id)
-                        })
-                break
+            case prefix+'ytmp4':
+                if (!isRegistered) return await bocchi.reply(from, ind.notRegistered(), id)
+                if (!q) return await bocchi.reply(from, ind.wrongFormat(), id)
+                if (limit.isLimit(sender.id, _limit, limitCount, isPremium, isOwner)) return await bocchi.reply(from, ind.limit(), id)
+                limit.addLimit(sender.id, _limit, isPremium, isOwner)
+                await bocchi.reply(from, ind.wait(), id)
+                downloader.ytdl(url)
+                    .then(async ({ result }) => {
+                        if (Number(result.size.split(' MB')[0]) >= 50.0) return bocchi.sendFileFromUrl(from, result.imgUrl, `${result.title}.jpg`, `Judul: ${result.title}\nSize: *${result.size}*\n\nGagal, Maksimal video size adalah *50MB*!`, id)
+                        await bocchi.sendFileFromUrl(from, result.imgUrl, `${result.title}.jpg`, ind.ytMP4(result), id)
+                        const responses = await fetch(result.UrlVideo)
+                        const buffer = await responses.buffer()
+                        await fs.writeFile(`./temp/ytplay_${sender.id}.mp4`, buffer)
+                        await bocchi.sendFile(from, `./temp/ytplay_${sender.id}.mp4`, `ytplay_${sender.id}`, id)
+
+                        console.log('Success sending YTDL mp4!')
+                    })
+                    .catch(async (err) => {
+                        console.error(err)
+                        await bocchi.reply(from, 'Error!', id)
+                    })
+            break
             case prefix+'tiktokpic':
                 if (!isRegistered) return await bocchi.reply(from, ind.notRegistered(), id)
                 if (!q) return await bocchi.reply(from, ind.wrongFormat(), id)

@@ -430,11 +430,10 @@ Media sedang dikirim, mohon tunggu...
 
 exports.ytMP4 = (result) => {
     return `
-*── 「 PLAY 」 ──*
+*── 「 YTMP4 」 ──*
 
 ➸ *Judul*: ${result.title}
 ➸ *Durasi*: ${result.duration}
-➸ *Link*: ${result.url}
 
 Media sedang dikirim, mohon tunggu...
     `
